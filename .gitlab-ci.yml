@@ -1,0 +1,79 @@
+# Author: Jintao Zhang <zhangjintao9020@gmail.com>
+image: docker:18.06.1-ce
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay2
+  IMAGE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH
+
+stages:
+  - run-perf
+  - compare
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+.perf_template: &perf_definition
+  script:
+    - cd $TARGET
+    - docker build -t "$IMAGE_NAME:$TARGET" .
+    - docker images
+    - mkdir -p build
+    #- docker push "$IMAGE_NAME:stretch-perf"
+    - docker run --rm -v $PWD/build:/host "$IMAGE_NAME:$TARGET" cp /app/$TARGET-py3.json /host/
+    - ls -al build/
+
+stretch-perf:
+  stage: run-perf
+  variables:
+    TARGET: stretch-perf
+  script:
+  <<: *perf_definition
+  artifacts:
+    paths: 
+      - stretch-perf/build/stretch-perf-py3.json
+    expire_in: 30d
+
+slim-perf:
+  stage: run-perf
+  variables:
+    TARGET: slim-perf
+  script:
+  <<: *perf_definition
+  artifacts:
+    paths: 
+      - slim-perf/build/slim-perf-py3.json
+    expire_in: 30d
+
+alpine-perf:
+  stage: run-perf
+  variables:
+    TARGET: alpine-perf
+  script:
+  <<: *perf_definition
+  artifacts:
+    paths: 
+      - alpine-perf/build/alpine-perf-py3.json
+    expire_in: 30d
+
+compare:
+  stage: compare
+  image: python:3.7
+  before_script:
+    - ls **
+  script:
+    - python3 -m pip install performance
+    - ls **
+    - python3 -m perf compare_to slim-perf/build/slim-perf-py3.json stretch-perf/build/stretch-perf-py3.json alpine-perf/build/alpine-perf-py3.json --table > result.txt
+  artifacts:
+    paths: 
+      - result.txt
+    expire_in: 30d
+  after_script:
+    - ls **
+
+
+after_script:
+  - docker logout $CI_REGISTRY
