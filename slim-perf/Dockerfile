@@ -11,4 +11,4 @@ RUN apt update \
 # Run benchmarks
 RUN pyperformance run --python=python3 -o $FILENAME
 
-RUN python3 -m perf stats $FILENAME
+RUN python3 -m pyperf stats $FILENAME

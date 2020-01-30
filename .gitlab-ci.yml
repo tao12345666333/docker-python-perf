@@ -64,9 +64,9 @@ compare:
   before_script:
     - ls **
   script:
-    - python3 -m pip install performance
+    - python3 -m pip install pyperformance
     - ls **
-    - python3 -m perf compare_to slim-perf/build/slim-perf-py3.json stretch-perf/build/stretch-perf-py3.json alpine-perf/build/alpine-perf-py3.json --table > result.txt
+    - python3 -m pyperf compare_to slim-perf/build/slim-perf-py3.json stretch-perf/build/stretch-perf-py3.json alpine-perf/build/alpine-perf-py3.json --table > result.txt
   artifacts:
     paths: 
       - result.txt
