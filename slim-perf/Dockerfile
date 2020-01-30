@@ -6,7 +6,7 @@ WORKDIR /app
 # Install performance suite
 RUN apt update \
         && apt install -y gcc \
-        && python3 -m pip install performance
+        && python3 -m pip install pyperformance
 
 # Run benchmarks
 RUN pyperformance run --python=python3 -o $FILENAME

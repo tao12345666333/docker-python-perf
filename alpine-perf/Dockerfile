@@ -5,7 +5,7 @@ WORKDIR /app
 
 RUN apk add --no-cache gcc musl-dev linux-headers
 # Install performance suite
-RUN python3 -m pip install performance
+RUN python3 -m pip install pyperformance
 
 # Run benchmarks
 RUN pyperformance run --python=python3 -o $FILENAME
